@@ -149,8 +149,8 @@
             <div class="d-avatar">${ini(d.name)}</div>
             <div style="flex:1">
               <div style="font-weight:500;font-size:.9rem">${d.name}</div>
-              <div class="match-phone">📍 ${d.city}${dist?' · '+dist:''}</div>
-              <div class="match-phone" style="color:var(--teal-dark);margin-top:2px">📞 ${d.phone}</div>
+              <div class="match-phone">${d.city}${dist?' · '+dist:''}</div>
+              <div class="match-phone" style="color:var(--teal-dark);margin-top:2px">${d.phone}</div>
             </div>
             <span class="d-blood">${d.blood}</span>
           </div>`;
@@ -367,7 +367,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.55);padding:2.5rem 3.5rem;d
 .fg{margin-bottom:1rem;position:relative;}
 .fl{display:block;font-size:.65rem;font-weight:500;color:var(--ink60);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem;}
 .fi,.fs{width:100%;background:#f8fdfe;border:1.5px solid rgba(13,46,53,.12);color:var(--ink);padding:.62rem .85rem;font-family:var(--sans);font-size:.88rem;border-radius:8px;outline:none;transition:border-color .2s;}
-.fi:focus,.fs:focus{border-color:var(--teal-mid);background:white;}
+.fi:focus,.fs:focus{border-color:var(--teal-mid);background:white;outline:none;}
 .fi::placeholder{color:rgba(13,46,53,.3);}
 .fs option{background:white;}
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
@@ -769,9 +769,9 @@ function renderReqs(){
       </div>
       <div class="card-hosp">${r.hosp}</div>
       <div class="card-meta">
-        <span>📍 ${r.city}</span>
-        <span>👤 ${r.name}</span>
-        <span>🕐 ${timeAgo(r.createdAt)}</span>
+        <span>${r.city}</span>
+        <span>${r.name}</span>
+        <span>${timeAgo(r.createdAt)}</span>
       </div>
       <div class="card-foot">
         <span class="units-txt">${r.units} unit${r.units>1?'s':''} needed</span>
