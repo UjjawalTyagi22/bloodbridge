@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
 
+
 <script type="module">
   import { initializeApp }                            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, collection, addDoc,
@@ -15,21 +16,21 @@
            deleteDoc, getDoc }                        from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   
 
-  /* FIREBASE CONFIG */
-const firebaseConfig = {
-  apiKey:            "AIzaSyADE_gVTFjUY9ENQFBScnp4TZ8KMPuGg0k",
-  authDomain:        "bloodbridge-cb5db.firebaseapp.com",
-  projectId:         "bloodbridge-cb5db",
-  storageBucket:     "bloodbridge-cb5db.firebasestorage.app",
-  messagingSenderId: "313109850032",
-  appId:             "1:313109850032:web:da1db00d8c9de939ea5875"
-};
+  /* firebase config */
+  const firebaseConfig = {
+    apiKey:            "AIzaSyADE_gVTFjUY9ENQFBScnp4TZ8KMPuGg0k",
+    authDomain:        "bloodbridge-cb5db.firebaseapp.com",
+    projectId:         "bloodbridge-cb5db",
+    storageBucket:     "bloodbridge-cb5db.firebasestorage.app",
+    messagingSenderId: "313109850032",
+    appId:             "1:313109850032:web:da1db00d8c9de939ea5875"
+  };
 
 
   const app  = initializeApp(firebaseConfig);
   const db   = getFirestore(app);
 
-  /*REAL TIME LISTENERS */
+  /*REAL-TIME LISTENERS */
 
 
   // Live requests feed — auto-updates every time Firestore changes
@@ -48,79 +49,39 @@ const firebaseConfig = {
     updateStats();
   });
 
-  /* ── AUTH STATE ──────────────────────────────────────────── */
-  onAuthStateChanged(auth, user => {
-    window._user = user;
-    document.getElementById('auth-indicator').textContent =
-      user ? `✓ Verified: ${user.phoneNumber}` : '';
-  });
 
-  /* ── EXPOSED TO WINDOW (called from regular HTML onclick) ── */
-
-  // Register donor with phone OTP verification
-  window.sendOTP = async function() {
-    const phone = document.getElementById('d-phone').value.trim();
-    if(!phone){ toast('Enter your phone number first.','err'); return; }
-    try {
-      if(!window.recaptchaVerifier) {
-        window.recaptchaVerifier = new RecaptchaVerifier(auth,'recaptcha-container',{size:'invisible'});
-      }
-      const confirmation = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
-      window._confirmOTP = confirmation;
-      document.getElementById('otp-row').style.display='grid';
-      document.getElementById('otp-btn').style.display='none';
-      document.getElementById('verify-btn').style.display='block';
-      toast('OTP sent to '+phone,'ok');
-    } catch(e){ toast('OTP error: '+e.message,'err'); console.error(e); }
-  };
-
-  window.verifyOTP = async function() {
-    const code = document.getElementById('d-otp').value.trim();
-    if(!code){ toast('Enter the OTP code.','err'); return; }
-    try {
-      await window._confirmOTP.confirm(code);
-      toast('Phone verified! Now submit.','ok');
-      document.getElementById('otp-row').style.display='none';
-      document.getElementById('submit-donor-btn').style.display='block';
-    } catch(e){ toast('Wrong OTP. Try again.','err'); }
-  };
-
+  /* REGISTER DONOR — direct */
   window.registerDonor = async function() {
-    const name   = document.getElementById('d-name').value.trim();
-    const blood  = document.getElementById('d-blood').value;
-    const age    = +document.getElementById('d-age').value;
-    const city   = document.getElementById('d-city').value.trim();
-    const phone  = document.getElementById('d-phone').value.trim();
-    const avail  = document.getElementById('d-avail').value;
+    const name  = document.getElementById('d-name').value.trim();
+    const blood = document.getElementById('d-blood').value;
+    const age   = +document.getElementById('d-age').value;
+    const city  = document.getElementById('d-city').value.trim();
+    const phone = document.getElementById('d-phone').value.trim();
+    const avail = document.getElementById('d-avail').value;
 
-    if(!name||!blood||!age||!city||!phone){ toast('Fill in all required fields.','err'); return; }
-    if(age<18||age>65){ toast('Age must be 18–65.','err'); return; }
+    if(!name||!blood||!age||!city||!phone){ toast('Please fill in all fields.','err'); return; }
+    if(age<18||age>65){ toast('Age must be between 18 and 65.','err'); return; }
 
-    // Get user's GPS coordinates
     let lat=null, lng=null;
     try {
       const pos = await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:5000}));
       lat = pos.coords.latitude;
       lng = pos.coords.longitude;
-    } catch(e){ /* location optional */ }
+    } catch(e){}
 
     try {
       await addDoc(collection(db,"donors"),{
         name, blood, age, city, phone,
         available: avail === 'yes',
         lat, lng,
-        uid: window._user?.uid || null,
         createdAt: serverTimestamp()
       });
       closeM('m-donor');
-      toast(`${name} registered as ${blood} donor!`,'ok');
-      ['d-name','d-blood','d-age','d-city','d-phone','d-otp'].forEach(id=>{
+      toast(name+' registered as '+blood+' donor!','ok');
+      ['d-name','d-blood','d-age','d-city','d-phone'].forEach(id=>{
         const el=document.getElementById(id); if(el) el.value='';
       });
-      document.getElementById('otp-btn').style.display='block';
-      document.getElementById('verify-btn').style.display='none';
-      document.getElementById('submit-donor-btn').style.display='none';
-    } catch(e){ toast('Error saving: '+e.message,'err'); }
+    } catch(e){ toast('Error: '+e.message,'err'); }
   };
 
   window.postRequest = async function() {
@@ -150,6 +111,7 @@ const firebaseConfig = {
       toast('Request posted live to the network!','ok');
       ['r-name','r-blood','r-units','r-hosp','r-city','r-phone'].forEach(id=>document.getElementById(id).value='');
       // Auto-show matches
+
       setTimeout(()=> window.showMatches(ref.id), 800);
     } catch(e){ toast('Error: '+e.message,'err'); }
   };
@@ -167,6 +129,7 @@ const firebaseConfig = {
     const compatTypes = COMPAT[req.blood]?.receives || [];
     const donors = (window._donors||[]).filter(d=> compatTypes.includes(d.blood) && d.available !== false);
 
+    
     // If both have GPS — sort by distance
     if(req.lat && req.lng) {
       donors.sort((a,b)=> {
@@ -186,8 +149,8 @@ const firebaseConfig = {
             <div class="d-avatar">${ini(d.name)}</div>
             <div style="flex:1">
               <div style="font-weight:500;font-size:.9rem">${d.name}</div>
-              <div class="match-phone"> ${d.city}${dist?' · '+dist:''}</div>
-              <div class="match-phone" style="color:var(--teal-dark);margin-top:2px"> ${d.phone}</div>
+              <div class="match-phone">📍 ${d.city}${dist?' · '+dist:''}</div>
+              <div class="match-phone" style="color:var(--teal-dark);margin-top:2px">📞 ${d.phone}</div>
             </div>
             <span class="d-blood">${d.blood}</span>
           </div>`;
@@ -563,7 +526,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.55);padding:2.5rem 3.5rem;d
 <section class="bb-sec" id="blood-bank">
   <div class="sec-eyebrow">Blood Bank Status</div>
   <div class="sec-title reveal">Live <strong>Availability</strong></div>
-  <p class="sec-sub reveal" style="margin-top:.4rem">Donor availability per blood group, updated as donors register or mark unavailable.</p>
+  <p class="sec-sub reveal" style="margin-top:.4rem">Donor availability per blood group — updated as donors register or mark unavailable.</p>
   <div class="bb-grid" id="bb-grid"></div>
 </section>
 
@@ -652,8 +615,8 @@ footer{background:var(--ink);color:rgba(255,255,255,.55);padding:2.5rem 3.5rem;d
     <div class="fg"><label class="fl">City</label><input type="text" class="fi" id="d-city" placeholder="Dehradun"></div>
     <div class="fg"><label class="fl">Availability</label>
       <select class="fs" id="d-avail">
-        <option value="yes">Available to donate now</option>
-        <option value="no">Not available currently</option>
+        <option value="yes">✅ Available to donate now</option>
+        <option value="no">⏳ Not available currently</option>
       </select>
     </div>
     <div class="fg">
@@ -671,7 +634,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.55);padding:2.5rem 3.5rem;d
     </div>
     <button class="f-submit" id="submit-donor-btn" onclick="window.registerDonor()" style="display:none">Complete Registration →</button>
     <div style="font-size:.72rem;color:var(--ink60);margin-top:.8rem;text-align:center">
-      Phone verified via Firebase. Location is optional but helps match nearby donors.
+      🔒 Phone verified via Firebase. Location is optional but helps match nearby donors.
     </div>
   </div>
 </div>
@@ -817,9 +780,9 @@ function renderReqs(){
       </div>
       <div class="card-hosp">${r.hosp}</div>
       <div class="card-meta">
-        <span> ${r.city}</span>
-        <span> ${r.name}</span>
-        <span> ${timeAgo(r.createdAt)}</span>
+        <span>📍 ${r.city}</span>
+        <span>👤 ${r.name}</span>
+        <span>🕐 ${timeAgo(r.createdAt)}</span>
       </div>
       <div class="card-foot">
         <span class="units-txt">${r.units} unit${r.units>1?'s':''} needed</span>
@@ -845,7 +808,7 @@ function renderDonors(){
       <div class="d-avatar">${ini(d.name||'?')}</div>
       <div style="flex:1">
         <div class="d-name">${d.name}</div>
-        <div class="d-meta">${d.city} · Age ${d.age}</div>
+        <div class="d-meta">📍 ${d.city} · Age ${d.age}</div>
         <div class="d-meta" style="margin-top:2px">${d.phone}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
