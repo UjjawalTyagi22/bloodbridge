@@ -13,11 +13,9 @@
            onSnapshot, query, orderBy, where,
            serverTimestamp, doc, updateDoc,
            deleteDoc, getDoc }                        from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { getAuth, RecaptchaVerifier,
-           signInWithPhoneNumber,
-           onAuthStateChanged }                       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  
 
-  /* FIREBASE CONFIG*/
+  /* FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey:            "AIzaSyADE_gVTFjUY9ENQFBScnp4TZ8KMPuGg0k",
   authDomain:        "bloodbridge-cb5db.firebaseapp.com",
@@ -27,11 +25,11 @@ const firebaseConfig = {
   appId:             "1:313109850032:web:da1db00d8c9de939ea5875"
 };
 
+
   const app  = initializeApp(firebaseConfig);
   const db   = getFirestore(app);
-  const auth = getAuth(app);
 
-  /*REAL-TIME LISTENERS */
+  /*REAL TIME LISTENERS */
 
 
   // Live requests feed — auto-updates every time Firestore changes
@@ -50,14 +48,14 @@ const firebaseConfig = {
     updateStats();
   });
 
-  /*AUTH STATE */
+  /* ── AUTH STATE ──────────────────────────────────────────── */
   onAuthStateChanged(auth, user => {
     window._user = user;
     document.getElementById('auth-indicator').textContent =
       user ? `✓ Verified: ${user.phoneNumber}` : '';
   });
 
-  /*EXPOSED TO WINDOW (called from regular HTML onclick) */
+  /* ── EXPOSED TO WINDOW (called from regular HTML onclick) ── */
 
   // Register donor with phone OTP verification
   window.sendOTP = async function() {
@@ -97,7 +95,6 @@ const firebaseConfig = {
 
     if(!name||!blood||!age||!city||!phone){ toast('Fill in all required fields.','err'); return; }
     if(age<18||age>65){ toast('Age must be 18–65.','err'); return; }
-
 
     // Get user's GPS coordinates
     let lat=null, lng=null;
@@ -189,8 +186,8 @@ const firebaseConfig = {
             <div class="d-avatar">${ini(d.name)}</div>
             <div style="flex:1">
               <div style="font-weight:500;font-size:.9rem">${d.name}</div>
-              <div class="match-phone">📍 ${d.city}${dist?' · '+dist:''}</div>
-              <div class="match-phone" style="color:var(--teal-dark);margin-top:2px">📞 ${d.phone}</div>
+              <div class="match-phone"> ${d.city}${dist?' · '+dist:''}</div>
+              <div class="match-phone" style="color:var(--teal-dark);margin-top:2px"> ${d.phone}</div>
             </div>
             <span class="d-blood">${d.blood}</span>
           </div>`;
@@ -474,7 +471,6 @@ footer{background:var(--ink);color:rgba(255,255,255,.55);padding:2.5rem 3.5rem;d
     <li><a href="#compat">Compatibility</a></li>
     <li><a href="#how">How It Works</a></li>
   </ul>
-  <span id="auth-indicator"></span>
 </nav>
 
 <!-- HERO -->
@@ -483,7 +479,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.55);padding:2.5rem 3.5rem;d
   <div class="cloud" style="width:220px;height:40px;top:32%;right:8%;"></div>
   <div class="cloud" style="width:500px;height:70px;top:16%;left:30%;"></div>
 
-  <div class="hero-label">Emergency Blood Network · Real-Time · Verified Donors</div>
+  <div class="hero-label">Emergency Blood Network · Real-Time</div>
   <h1>By registering today,<br><strong>you could save a life.</strong></h1>
   <p class="hero-sub">Discover the network</p>
   <button class="cta-btn" onclick="openM('m-donor')">
@@ -567,7 +563,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.55);padding:2.5rem 3.5rem;d
 <section class="bb-sec" id="blood-bank">
   <div class="sec-eyebrow">Blood Bank Status</div>
   <div class="sec-title reveal">Live <strong>Availability</strong></div>
-  <p class="sec-sub reveal" style="margin-top:.4rem">Donor availability per blood group — updated as donors register or mark unavailable.</p>
+  <p class="sec-sub reveal" style="margin-top:.4rem">Donor availability per blood group, updated as donors register or mark unavailable.</p>
   <div class="bb-grid" id="bb-grid"></div>
 </section>
 
@@ -587,7 +583,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.55);padding:2.5rem 3.5rem;d
     <div class="step">
       <div class="step-num">01</div>
       <h3>Register</h3>
-      <p>Donors verify their phone via OTP, enter blood type, city and GPS location. Takes under 90 seconds.</p>
+      <p>Donors sign up with blood type, city and contact. Takes under 60 seconds and goes live instantly.</p>
     </div>
     <div class="step">
       <div class="step-num">02</div>
@@ -633,7 +629,6 @@ footer{background:var(--ink);color:rgba(255,255,255,.55);padding:2.5rem 3.5rem;d
 
 <!-- TOAST -->
 <div class="toast-wrap" id="toasts"></div>
-<div id="recaptcha-container"></div>
 
 <!-- ── MODALS ── -->
 
@@ -642,7 +637,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.55);padding:2.5rem 3.5rem;d
   <div class="modal">
     <button class="modal-x" onclick="closeM('m-donor')">✕</button>
     <div class="modal-title">Register as Donor</div>
-    <div class="modal-sub">Phone verification required. Your info is stored securely in our database.</div>
+    <div class="modal-sub">Fill in your details and go live instantly on the network.</div>
     <div class="fg"><label class="fl">Full Name</label><input type="text" class="fi" id="d-name" placeholder="Arjun Sharma"></div>
     <div class="fr">
       <div class="fg"><label class="fl">Blood Type</label>
@@ -657,8 +652,8 @@ footer{background:var(--ink);color:rgba(255,255,255,.55);padding:2.5rem 3.5rem;d
     <div class="fg"><label class="fl">City</label><input type="text" class="fi" id="d-city" placeholder="Dehradun"></div>
     <div class="fg"><label class="fl">Availability</label>
       <select class="fs" id="d-avail">
-        <option value="yes"> Available to donate now</option>
-        <option value="no"> Not available currently</option>
+        <option value="yes">Available to donate now</option>
+        <option value="no">Not available currently</option>
       </select>
     </div>
     <div class="fg">
@@ -822,9 +817,9 @@ function renderReqs(){
       </div>
       <div class="card-hosp">${r.hosp}</div>
       <div class="card-meta">
-        <span>📍 ${r.city}</span>
-        <span>👤 ${r.name}</span>
-        <span>🕐 ${timeAgo(r.createdAt)}</span>
+        <span> ${r.city}</span>
+        <span> ${r.name}</span>
+        <span> ${timeAgo(r.createdAt)}</span>
       </div>
       <div class="card-foot">
         <span class="units-txt">${r.units} unit${r.units>1?'s':''} needed</span>
@@ -850,7 +845,7 @@ function renderDonors(){
       <div class="d-avatar">${ini(d.name||'?')}</div>
       <div style="flex:1">
         <div class="d-name">${d.name}</div>
-        <div class="d-meta">📍 ${d.city} · Age ${d.age}</div>
+        <div class="d-meta">${d.city} · Age ${d.age}</div>
         <div class="d-meta" style="margin-top:2px">${d.phone}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
