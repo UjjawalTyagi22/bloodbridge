@@ -409,16 +409,84 @@ footer{background:var(--ink);color:rgba(255,255,255,.55);padding:2.5rem 3.5rem;d
 .info-box strong{color:var(--teal-dark);}
 .info-box code{background:rgba(13,46,53,.07);padding:.1rem .4rem;border-radius:4px;font-size:.78rem;font-family:monospace;}
 
+/* HAMBURGER MENU */
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:.4rem;z-index:101;}
+.hamburger span{display:block;width:22px;height:2px;background:var(--white);margin:5px 0;border-radius:2px;transition:transform .3s,opacity .3s;}
+.hamburger.active span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.hamburger.active span:nth-child(2){opacity:0;}
+.hamburger.active span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
 @media(max-width:900px){
   nav{padding:1rem 1.5rem;}
-  .nav-links{display:none;}
+  .hamburger{display:block;}
+  .nav-links{
+    display:none;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(8,130,148,.97);backdrop-filter:blur(16px);
+    align-items:center;justify-content:center;gap:2rem;z-index:100;
+  }
+  .nav-links.open{display:flex;}
+  .nav-links a{font-size:1.1rem;color:var(--white);}
   .hero{padding:6rem 1.5rem 0;}
   section{padding:3.5rem 1.5rem;}
   .dash-grid{grid-template-columns:1fr;}
   .compat-grid,.bb-grid{grid-template-columns:repeat(2,1fr);}
   .steps{grid-template-columns:1fr;}
   .steps::before{display:none;}
-  footer{flex-direction:column;gap:1rem;}
+  footer{flex-direction:column;gap:1rem;text-align:center;}
+}
+
+/* SMALL TABLETS & LARGE PHONES */
+@media(max-width:600px){
+  nav{padding:.85rem 1rem;}
+  .logo{font-size:.85rem;}
+  .hero{padding:5rem 1rem 0;}
+  .hero h1{font-size:clamp(1.8rem,7vw,2.6rem);}
+  .hero-sub{font-size:.8rem;margin-bottom:1.8rem;}
+  .cta-btn{padding:.8rem 1.4rem;font-size:.78rem;gap:.6rem;margin-bottom:2rem;}
+  .stats-row{gap:1.8rem;justify-content:center;}
+  .stat-num{font-size:1.5rem;}
+  .stat-label{font-size:.6rem;}
+  .hero-orb{width:min(320px,80vw);}
+  section{padding:2.5rem 1rem;}
+  .sec-title{font-size:clamp(1.4rem,5vw,2rem);}
+  .sec-sub{font-size:.82rem;}
+  .dash-top{flex-direction:column;align-items:flex-start;gap:.8rem;}
+  .dash-top > div:last-child{width:100%;justify-content:flex-start;}
+  .btn{font-size:.75rem;padding:.5rem 1rem;}
+  .compat-grid{grid-template-columns:1fr 1fr;gap:.6rem;}
+  .compat-card{padding:1rem;}
+  .c-type{font-size:1.25rem;}
+  .bb-grid{grid-template-columns:1fr 1fr;gap:.7rem;}
+  .bb-card{padding:.9rem;}
+  .bb-type{font-size:1.3rem;}
+  .card-foot{flex-direction:column;align-items:flex-start;gap:.45rem;}
+  .card-foot > div{width:100%;display:flex;gap:.4rem;}
+  .fr{grid-template-columns:1fr;}
+  .modal{padding:1.5rem;width:94%;border-radius:14px;}
+  .modal-title{font-size:1.15rem;}
+  .modal-sub{font-size:.76rem;margin-bottom:1.2rem;}
+  .fi,.fs{padding:.55rem .7rem;font-size:.84rem;}
+  .f-submit{padding:.75rem;font-size:.84rem;}
+  footer{padding:2rem 1rem;}
+  .foot-meta{font-size:.65rem;text-align:center;}
+  .fab{padding:.7rem 1.1rem;font-size:.76rem;bottom:1.2rem;right:1rem;}
+  .toast-wrap{bottom:4.5rem;right:1rem;left:1rem;}
+  .toast{min-width:auto;font-size:.78rem;}
+  .search-row{flex-direction:column;gap:.35rem;}
+  .search-input,.type-filter{width:100%;}
+  .panel-body{max-height:380px;}
+}
+
+/* VERY SMALL PHONES */
+@media(max-width:380px){
+  .hero h1{font-size:1.6rem;}
+  .cta-btn{padding:.7rem 1rem;font-size:.72rem;width:100%;justify-content:center;}
+  .stats-row{gap:1.2rem;}
+  .stat-num{font-size:1.3rem;}
+  .compat-grid,.bb-grid{grid-template-columns:1fr;}
+  .hero-orb{width:min(260px,85vw);}
+  .modal{padding:1.2rem;width:96%;}
+  .btn-ghost-red,.btn-ghost-green{font-size:.65rem;padding:.3rem .55rem;}
 }
 </style>
 </head>
@@ -427,13 +495,16 @@ footer{background:var(--ink);color:rgba(255,255,255,.55);padding:2.5rem 3.5rem;d
 <!-- NAV -->
 <nav id="nav">
   <a href="#" class="logo"><div class="logo-mark"></div>BloodBridge</a>
-  <ul class="nav-links">
-    <li><a href="#live">Active Requests</a></li>
-    <li><a href="#donors-panel">Donors</a></li>
-    <li><a href="#blood-bank">Blood Bank</a></li>
-    <li><a href="#compat">Compatibility</a></li>
-    <li><a href="#how">How It Works</a></li>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="#live" onclick="closeNav()">Active Requests</a></li>
+    <li><a href="#donors-panel" onclick="closeNav()">Donors</a></li>
+    <li><a href="#blood-bank" onclick="closeNav()">Blood Bank</a></li>
+    <li><a href="#compat" onclick="closeNav()">Compatibility</a></li>
+    <li><a href="#how" onclick="closeNav()">How It Works</a></li>
   </ul>
+  <button class="hamburger" id="hamburger" onclick="toggleNav()" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <!-- HERO -->
@@ -534,7 +605,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.55);padding:2.5rem 3.5rem;d
 <section class="compat-sec" id="compat">
   <div class="sec-eyebrow">Reference Guide</div>
   <div class="sec-title reveal">Blood Type <strong>Compatibility</strong></div>
-  <p class="sec-sub reveal" style="margin-top:.4rem">Hover a card to explore. Understanding compatibility can be life-saving.</p>
+  <p class="sec-sub reveal" style="margin-top:.4rem">Understanding compatibility can be life-saving.</p>
   <div class="compat-grid reveal" id="compat-grid"></div>
 </section>
 
@@ -688,6 +759,16 @@ const COMPAT = {
   'AB-':{gives:['AB-','AB+'],                               receives:['O-','A-','B-','AB-']},
   'AB+':{gives:['AB+'],                                     receives:['O-','O+','A-','A+','B-','B+','AB-','AB+']}
 };
+
+/* HAMBURGER NAV */
+function toggleNav(){
+  document.getElementById('nav-links').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('active');
+}
+function closeNav(){
+  document.getElementById('nav-links').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('active');
+}
 
 /* REAL HOSPITALS IN INDIA */
 const HOSPITALS = [
